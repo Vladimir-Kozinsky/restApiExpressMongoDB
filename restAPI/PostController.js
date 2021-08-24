@@ -48,30 +48,20 @@ class PostController {
         const deletePost = await Post.findByIdAndDelete(id)
         return res.json(deletePost);
     }
-    async auth(req, res) {
+    async isAuth(req, res) {
         try {
-            const { email, password, rememberMe } = req.body
-            const auth = await PostAuth.create({ email, password, rememberMe })
-            console.log(req.body)
+            // const { email, password, rememberMe } = req.body
+            const post = req.body
+            const { email, password } = req.params
+            const auth = await PostAuth.find(post.email)
+            console.log(auth.password)
+            console.log(post.password)
             res.json(auth)
         } catch (e) {
             res.status(500).json(e)
         }
     }
-    async isAuth(req, res) {
-        try {
-            const { email } = req.params
-            
-            const auth = await PostAuth.findOne(email);
-            if (!auth) {
-                res.status(400).json({ message: "Email not found" })
-            }
-            console.log(req.body)
-            res.json(auth)
-        } catch (e) {
-            res.status(400).json({ message: "Id is required" })
-        }
-    }
+
 }
 
 export default new PostController();
