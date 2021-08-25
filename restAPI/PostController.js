@@ -13,9 +13,16 @@ class PostController {
         }
     }
     async getAll(req, res) {
+        res.header('Access-Control-Allow-Origin', '*');
         try {
+
+            // res.header('Access-Control-Allow-Origin', '*');
+            // res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
             const posts = await Post.find();
-            return res.json(posts);
+            return res.json({
+                ResultCode: 0,
+                data: posts
+            });
         } catch (e) {
             res.status(500).json(e)
         }
@@ -49,19 +56,40 @@ class PostController {
         return res.json(deletePost);
     }
     async isAuth(req, res) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         try {
-            // const { email, password, rememberMe } = req.body
-            const post = req.body
-            const { email, password } = req.params
-            const auth = await PostAuth.find(post.email)
-            console.log(auth.password)
-            console.log(post.password)
-            res.json(auth)
+            // res.header('Access-Control-Allow-Origin', '*')
+            
+            const auth = await PostAuth.findOne({ "email": req.email })
+            console.log(req.body)
+            if (!auth) {
+                res.status(400).json({
+                    ResultCode: 1,
+                    message: "User didn't find"
+                })
+            }
+            const result = {
+                ResultCode: 0,
+                messages: [],
+                data: {
+                    userId: auth._id
+                }
+            }
+            if (auth.password != req.body.password) {
+                res.status(400).json({
+                    ResultCode: 1,
+                    message: "Password is wrong"
+                })
+            }
+            res.json(result)
         } catch (e) {
-            res.status(500).json(e)
+            res.status(500).json({
+                ResultCode: 1,
+                message: e
+            })
         }
     }
-
 }
 
 export default new PostController();
